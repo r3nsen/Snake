@@ -20,13 +20,13 @@ namespace Snake
         (int x, int y) playerDir = (0, 0);//Vector2.Zero;
         (int x, int y) nextplayerDir = (0, 0);//Vector2.Zero;
 
-        int[,] map = new int[49, 28];
+        int[,] map = new int[mapY, mapX];
         int delay = 0;
         const int delayOffset = 10;
-        const int size = 20;
+        const int size = 40;
 
-        const int mapX = 49;
-        const int mapY = 28;
+        const int mapX = 24;
+        const int mapY = 14;
 
         (int x, int y)[] len = new (int x, int y)[mapX * mapY];
 
@@ -53,7 +53,7 @@ namespace Snake
             for (int i = 0; i < imax; i++)
             {
                 for (int j = 0; j < jmax; j++)
-                    map[i, j] = i == 1 || j == 1 || i == imax - 2 || j == jmax - 2 ? 1 : 0;
+                    map[i, j] = i == 0 || j == 0 || i == imax - 1 || j == jmax - 1 ? 1 : 0;
             }
             start();
             base.Initialize();
@@ -86,42 +86,57 @@ namespace Snake
             {
 
 
-                if (map[len[0].x, len[0].y] == 2)
+                if (map[len[0].y, len[0].x] == 2)
                 {
-                    map[len[0].x, len[0].y] = 0;
+                    map[len[0].y, len[0].x] = 0;
                     currLen++;
                     currLen = Math.Clamp(currLen, 0, len.Length);
                     spawnDot();
                 }
 
+                for (int i = 1; i < currLen - 1; i++)
+                    if (len[0] == len[i]) start();
+
                 for (int i = currLen - 1; i > 0; i--)
                     len[i] = len[i - 1];
 
-                playerDir = nextplayerDir;
+                if (nextplayerDir != (-playerDir.x, -playerDir.y))
+                    playerDir = nextplayerDir;
+
                 len[0].x += playerDir.x;// playerPos += playerDir;
                 len[0].y += playerDir.y;
+
                 delay += delayOffset;
 
-                if (map[len[0].x, len[0].y] == 1) start();                    
+                if (map[len[0].y, len[0].x] == 1) start();
             }
 
             //currPlayerPos = new Vector2(len[0].x, len[0].y) * size - (((float)size / delayOffset) * delay) * new Vector2(playerDir.x, playerDir.y);
         }
         void spawnDot()
         {
-            map[rand.Next(2, mapX - 2), rand.Next(2, mapY - 2)] = 2;
+        setspawn:
+            int x = rand.Next(2, mapX - 2);
+            int y = rand.Next(2, mapY - 2);
+
+            for (int i = 0; i < currLen - 1; i++)
+                if ((len[i].x, len[i].y) == (x, y))
+                    goto setspawn;
+
+            map[y, x] = 2;
         }
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(new Color(20, 20, 20));
-            _gm.begin(Vector2.Zero, new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight));
+            Vector2 screenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
+            _gm.begin(new Vector2(mapX * size / 2 - 20, mapY * size / 2 - 20) - screenSize / 2, screenSize);
             //_gm.drawBlock(currPlayerPos, playerColor);          
 
-            int imax = map.GetLength(0);
-            int jmax = map.GetLength(1);
-            for (int i = 0; i < imax; i++)
-                for (int j = 0; j < jmax; j++)
-                    switch (map[i, j])
+            int imax = map.GetLength(1);
+            int jmax = map.GetLength(0);
+            for (int j = 0; j < jmax; j++)
+                for (int i = 0; i < imax; i++)
+                    switch (map[j, i])
                     {
                         case 1:
                             _gm.drawBlock(new Vector2(i, j) * size, mapColor);
