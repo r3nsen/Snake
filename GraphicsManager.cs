@@ -54,7 +54,7 @@ namespace Snake
 
             Matrix world = Matrix.CreateTranslation(new Vector3(-.5f, -.5f, 0))
                 //* Matrix.CreateRotationZ(MathHelper.PiOver2 * flipX)
-                * Matrix.CreateScale(new Vector3(20, 20, 1))
+                * Matrix.CreateScale(new Vector3(40, 40, 1))
                 * Matrix.CreateTranslation(new Vector3(pos, 0));
 
             for (int i = vertexCount - 4; i < vertexCount; i++)
